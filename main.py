@@ -12,17 +12,17 @@ def main():
     os.makedirs(ISO_DIR, exist_ok=True)
     os.makedirs(EXTRACTED_DIR, exist_ok=True)
 
-    # 1. Garantir que o extract-xiso está disponível
+    # 1. Ensure extract-xiso is available
     ensure_extract_xiso(print)
 
-    # 2. Perguntar IP manualmente
-    user_ip = input("Enter your Xbox IP address (leave blank to auto-detect): ").strip()
+    # 2. Ask for IP manually
+    user_ip = input("Enter your Xbox IP address: ").strip()
     if user_ip:
         xbox_ip = user_ip
 
     print(f"\n📡 Using Xbox IP: {xbox_ip}\n")
 
-    # 3. Processar todos os .iso da pasta
+    # 3. Process all .iso files in the folder
     for filename in os.listdir(ISO_DIR):
         if not filename.lower().endswith(".iso"):
             continue
