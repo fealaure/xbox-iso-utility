@@ -1,6 +1,7 @@
 import os
 from core.extractor import ensure_extract_xiso, extract_iso
 from core.ftp_uploader import upload_directory
+from utils.config import load_config, save_config
 
 ISO_DIR = "isos"
 EXTRACTED_DIR = "extracted"
@@ -15,32 +16,59 @@ def main():
     # 1. Ensure extract-xiso is available
     ensure_extract_xiso(print)
 
-    # 2. Ask for IP manually
-    user_ip = input("Enter your Xbox IP address: ").strip()
-    if user_ip:
-        xbox_ip = user_ip
+    # 2. Load config
+    config = load_config()
+    xbox_ip = config.get("xbox_ip")
+    xbox_port = config.get("xbox_port", 21)
 
-    print(f"\n📡 Using Xbox IP: {xbox_ip}\n")
+    if xbox_ip and xbox_port:
+        print(f"📡 Saved IP: {xbox_ip}")
+        print(f"🔌 Saved Port: {xbox_port}")
+
+        use_saved = input("Use saved IP and port? (Y/n): ").strip().lower()
+    
+        if use_saved != "n":
+            print(f"\n📡 Using Xbox IP: {xbox_ip}")
+            print(f"🔌 Using FTP port: {xbox_port}\n")
+        else:
+            xbox_ip = None
+            xbox_port = None
+    
+    else:
+        xbox_ip = None
+        xbox_port = None
+
+    if not xbox_ip:
+        xbox_ip = input("Enter your Xbox IP address: ").strip()
+        port_input = input("Enter FTP port (default is 21): ").strip()
+        xbox_port = int(port_input) if port_input else 21
+
+        config["xbox_ip"] = xbox_ip
+        config["xbox_port"] = xbox_port
+        save_config(config)
+
+        print(f"\n📡 Using Xbox IP: {xbox_ip}")
+        print(f"🔌 Using FTP port: {xbox_port}\n")
 
     # 3. Process all .iso files in the folder
-    for filename in os.listdir(ISO_DIR):
-        if not filename.lower().endswith(".iso"):
-            continue
+    iso_files = [f for f in os.listdir(ISO_DIR) if f.lower().endswith(".iso")]
+    print(f"Found {len(iso_files)} ISO(s) to process.\n")
 
+    for index, filename in enumerate(iso_files, 1):
+        print(f"=== [{index}/{len(iso_files)}] Processing {filename} ===")
+        
         iso_path = os.path.join(ISO_DIR, filename)
         game_name = os.path.splitext(filename)[0]
         extracted_path = os.path.join(EXTRACTED_DIR, game_name)
 
-        print(f"📁 Processing {filename}")
-
         if not os.path.exists(extracted_path):
             print("🗂️ Extracting...")
-            extract_iso(iso_path, print)
+            extract_iso(iso_path, print, output_dir=extracted_path)
         else:
             print("✅ Already extracted.")
 
         print("🚀 Uploading via FTP...")
-        upload_directory(extracted_path, f"{FTP_DEST}/{game_name}", xbox_ip, print)
+        upload_directory(extracted_path, f"{FTP_DEST}/{game_name}", xbox_ip, print, port=xbox_port)
         print("✅ Done!\n")
 
     print("🎉 All games processed and uploaded!")
