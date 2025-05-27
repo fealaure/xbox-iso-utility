@@ -1,4 +1,5 @@
 import os
+import shutil
 from core.extractor import ensure_extract_xiso, extract_iso
 from core.ftp_uploader import upload_directory
 from utils.config import load_config, save_config
@@ -77,7 +78,7 @@ def main():
         game_path = os.path.join(EXTRACTED_DIR, game_name)
         if os.path.isdir(game_path):
             print(f"🗑️ Cleaning up extracted directory: {game_path}")
-            os.rmdir(game_path)
+            shutil.rmtree(game_path)
 
     print("🗑️ Cleaned up extracted directories.\n")
 
