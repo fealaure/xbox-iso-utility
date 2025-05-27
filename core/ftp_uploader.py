@@ -1,5 +1,14 @@
 import os
 from ftplib import FTP
+import re
+
+def sanitize_fatx_name(name, max_length=42):
+    name = re.sub(r'[<>:"/\\|?*\+=\[\];,\.]', '', name)
+    name = name.replace(' ', '_')
+    name = re.sub(r'_+', '_', name)
+    name = name.strip('_')
+
+    return name[:max_length]
 
 def ensure_ftp_dirs(ftp, path, logger):
     dirs = path.strip("/").split("/")
@@ -7,6 +16,8 @@ def ensure_ftp_dirs(ftp, path, logger):
         if d == "." or d == "":
             continue
         try:
+            current_dir = ftp.pwd()
+            logger(f"Checking directory: {current_dir}/{d}")
             ftp.cwd(d)
         except Exception:
             try:
@@ -37,9 +48,7 @@ def upload_directory(local_path, remote_path, ip, logger, port=21, user="xbox", 
     for root, _, files in os.walk(local_path):
         rel_path = os.path.relpath(root, local_path)
         rel_path = rel_path.replace("\\", "/")
-        rel_path = rel_path.replace(" ", "_")
-        rel_path = "".join(c for c in rel_path if c.isalnum() or c in ('.', '_', '/'))
-        rel_path = rel_path.replace("__", "_")
+        rel_path = sanitize_fatx_name(rel_path)
         logger(f"Preparing to upload files from: {rel_path}")
 
         # Garantee the remote directory exists
