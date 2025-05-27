@@ -1,12 +1,9 @@
 import os
 import shutil
+from core.config import *
 from core.extractor import ensure_extract_xiso, extract_iso
 from core.ftp_uploader import upload_directory
 from utils.config import load_config, save_config
-
-ISO_DIR = "isos"
-EXTRACTED_DIR = "extracted"
-FTP_DEST = "/F/Games"
 
 def main():
     print("=== Xbox ISO Utility ===\n")
