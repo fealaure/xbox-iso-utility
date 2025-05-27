@@ -63,15 +63,23 @@ def main():
 
         if not os.path.exists(extracted_path):
             print("🗂️ Extracting...")
-            extract_iso(iso_path, print, output_dir=extracted_path)
+            extract_iso(iso_path, print, output_dir=EXTRACTED_DIR)
         else:
             print("✅ Already extracted.")
 
         print("🚀 Uploading via FTP...")
-        upload_directory(extracted_path, f"{FTP_DEST}/{game_name}", xbox_ip, print, port=xbox_port)
+        upload_directory(EXTRACTED_DIR, f"{FTP_DEST}/{game_name}", xbox_ip, print, port=xbox_port)
         print("✅ Done!\n")
 
     print("🎉 All games processed and uploaded!")
+    print("Cleaning started...\n")
+    for game_name in os.listdir(EXTRACTED_DIR):
+        game_path = os.path.join(EXTRACTED_DIR, game_name)
+        if os.path.isdir(game_path):
+            print(f"🗑️ Cleaning up extracted directory: {game_path}")
+            os.rmdir(game_path)
+
+    print("🗑️ Cleaned up extracted directories.\n")
 
 if __name__ == "__main__":
     main()

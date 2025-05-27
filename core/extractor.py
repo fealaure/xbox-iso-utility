@@ -34,20 +34,17 @@ def ensure_extract_xiso(logger):
 
 def extract_iso(iso_path, logger, output_dir=None):
     logger(f"Extracting ISO: {iso_path}")
-    
-    original_cwd = os.getcwd()
+
     iso_path = os.path.abspath(iso_path)
+    os.makedirs(output_dir, exist_ok=True)
 
     try:
-        if output_dir:
-            os.makedirs(output_dir, exist_ok=True)
-            os.chdir(output_dir)
-
         result = subprocess.run(
             [XISO_EXE, "-x", iso_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            cwd=output_dir
         )
 
         if result.returncode != 0:
@@ -58,4 +55,4 @@ def extract_iso(iso_path, logger, output_dir=None):
         logger("✅ Extraction successful.")
 
     finally:
-        os.chdir(original_cwd)
+        pass
