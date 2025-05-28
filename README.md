@@ -72,5 +72,4 @@ If your Xbox uses a different drive (like `E:/Games`), just edit the `FTP_DEST` 
 ## 💡 Notes
 
 - This tool does not support `.iso` files that are not in original Xbox format.
-- Long filenames with special characters are handled correctly via recursive FTP directory creation.
 - You can cancel and re-run the script safely; it skips already extracted games.
