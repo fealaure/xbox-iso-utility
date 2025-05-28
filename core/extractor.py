@@ -5,14 +5,14 @@ import zipfile
 import json
 import urllib.request
 from io import BytesIO
-from core.config import XISO_BINARY, GITHUB_API_URL, IS_WINDOWS
+from core.config import *
 
 def ensure_extract_xiso(logger):
     if os.path.exists(XISO_BINARY):
         logger("extract-xiso found.")
         return
 
-    logger("🖥️ Detected OS: Windows" if IS_WINDOWS else "🖥️ Detected OS: macOS")
+    logger("🖥️ Detected OS: Windows" if IS_WINDOWS else ("🖥️ Detected OS: Linux" if IS_LINUX else "🖥️ Detected OS: macOS"))
     logger("Downloading extract-xiso from GitHub...")
 
     with urllib.request.urlopen(GITHUB_API_URL) as response:
@@ -23,7 +23,10 @@ def ensure_extract_xiso(logger):
             if IS_WINDOWS and 'extract-xiso-Win64_Release.zip' in asset["name"]:
                 download_url = asset["browser_download_url"]
                 break
-            elif not IS_WINDOWS and 'macOS' in asset["name"] and asset["name"].endswith(".zip"):
+            elif IS_LINUX and 'linux' in asset["name"].lower() and asset["name"].endswith(".zip"):
+                download_url = asset["browser_download_url"]
+                break
+            elif not IS_WINDOWS and not IS_LINUX and 'macOS' in asset["name"] and asset["name"].endswith(".zip"):
                 download_url = asset["browser_download_url"]
                 break
 

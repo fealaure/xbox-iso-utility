@@ -1,7 +1,7 @@
 # Xbox ISO Utility
 
 A command-line tool written in Python to extract original Xbox ISO files and upload them via FTP to a modded Xbox console.
-This tool supports only windows for now
+This tool is compatible with Windows, Linux and MacOS
 
 This project automates the process of:
 1. Extracting Redump-compatible Xbox ISOs using `extract-xiso`;
