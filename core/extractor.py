@@ -5,6 +5,8 @@ import zipfile
 import json
 import urllib.request
 from io import BytesIO
+import shutil
+import tempfile
 from core.config import *
 
 def ensure_extract_xiso(logger):
@@ -36,23 +38,36 @@ def ensure_extract_xiso(logger):
     with urllib.request.urlopen(download_url) as response:
         zip_data = BytesIO(response.read())
 
+    # Extract into a temporary directory, find the binary and move it to the artifacts folder
     with zipfile.ZipFile(zip_data) as zip_file:
-        zip_file.extractall(os.path.dirname(XISO_BINARY))
+        temp_dir = tempfile.mkdtemp()
+        try:
+            zip_file.extractall(temp_dir)
 
-    if not IS_WINDOWS:
-        extracted_files = os.listdir(os.path.dirname(XISO_BINARY))
-        for file in extracted_files:
-            full_path = os.path.join(os.path.dirname(XISO_BINARY), file)
-            if os.path.isfile(full_path) and "extract-xiso" in file and not file.endswith(".zip"):
-                os.chmod(full_path, 0o755)
-                logger(f"extract-xiso is ready at: {full_path}")
-                break
-        else:
-            raise Exception("extract-xiso binary not found after extraction.")
-    else:
-        if not os.path.exists(XISO_BINARY):
-            raise Exception("extract-xiso.exe not found after download.")
-        logger("extract-xiso.exe is ready.")
+            # Search extracted files for the binary name
+            found_path = None
+            for root, dirs, files in os.walk(temp_dir):
+                for name in files:
+                    if name == XISO_FILENAME:
+                        found_path = os.path.join(root, name)
+                        break
+                if found_path:
+                    break
+
+            if not found_path:
+                raise Exception("extract-xiso binary not found inside downloaded archive.")
+
+            os.makedirs(os.path.dirname(XISO_BINARY), exist_ok=True)
+            # Move (or overwrite) the binary into the target artifacts folder
+            shutil.move(found_path, XISO_BINARY)
+
+            if not IS_WINDOWS:
+                os.chmod(XISO_BINARY, 0o755)
+                logger(f"extract-xiso is ready at: {XISO_BINARY}")
+            else:
+                logger("extract-xiso.exe is ready.")
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 def extract_iso(iso_path, logger, output_dir=None):
     logger(f"Extracting ISO: {iso_path}")
