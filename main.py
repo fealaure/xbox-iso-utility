@@ -66,7 +66,7 @@ def main():
             print("✅ Already extracted.")
 
         print("🚀 Uploading via FTP...")
-        upload_directory(EXTRACTED_DIR, f"{FTP_DEST}/{game_name}", xbox_ip, print, port=xbox_port)
+        upload_directory(extracted_path, f"{FTP_DEST}/{game_name}", xbox_ip, print, port=xbox_port)
         print("✅ Done!\n")
 
     print("🎉 All games processed and uploaded!")
